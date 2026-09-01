@@ -37,37 +37,37 @@ const STEPS: Array<{ title: string; body: string }> = [
   {
     title: '打开一个 PDB 条目',
     body:
-      '你从数据库下载结构，得到的是一个 <code>.pdb</code> 文件：几百行 <code>ATOM</code> 记录，每行描述一个原子——名字、坐标 <code>(x, y, z)</code>、以及两个神秘的尾巴数字。而文件头的 <code>EXPDTA</code> 明明白白写着：<strong>X-RAY DIFFRACTION</strong>。也就是说，这份「结构」来自 X 射线衍射。本篇教程要回答：这些数字，是怎么从一束 X 射线变成坐标的？',
+      '从数据库下载结构，拿到的是 <code>.pdb</code> 文件：几百行 <code>ATOM</code>，每行一个原子，名字、坐标 <code>(x, y, z)</code>，外加两个尾巴数字。文件头写得直白：<code>EXPDTA X-RAY DIFFRACTION</code>。这份「结构」来自 X 射线衍射。这篇教程就回答一件事：这些数字，是怎么从一束 X 射线变成坐标的？',
   },
   {
     title: 'RESOLUTION 1.50 —— 一个像「清晰度」的词',
     body:
-      '1CRN 写的是 <code>RESOLUTION 1.50 Å</code>。直觉上它像相机的「像素」：数字越小越清楚。但 1.50 Å 到底意味着什么？它测的是什么？它在夸耀什么、又隐瞒什么？到第 7 幕，我们会亲手把一张密度图从衍射斑里重建出来。届时你会明白，<strong>分辨率不是坐标误差，而是信息的截止频率</strong>。',
+      '1CRN 写着 <code>RESOLUTION 1.50 Å</code>。直觉上像相机的像素，越小越清楚。但 1.5 Å 到底意味着什么？它测的是什么？它没说出来的又是什么？到第 7 幕，我们会亲手把密度图从衍射斑里重建出来，到那时你会明白：<strong>分辨率不是坐标误差，而是信息的截止频率</strong>。',
   },
   {
     title: 'R value : NULL —— 一把缺了的尺子',
     body:
-      '1981 年的 1CRN，<code>REMARK 3</code> 里几乎所有校验字段都是 <code>NULL</code>。其中 <code>R VALUE</code> 与 <code>FREE R VALUE</code> 尤其值得注意：R-free 是 1992 年才发明的「防过拟合」指标——把一部分衍射斑留出来、<em>不</em>用于拟合，专门检验模型是否在骗你。所以：<strong>1981 年的结构没有这把尺子</strong>。读老条目时，请记得它缺少你习以为常的校验。',
+      '1981 年的 1CRN，<code>REMARK 3</code> 里几乎所有校验字段都是 <code>NULL</code>，包括 <code>R VALUE</code> 和 <code>FREE R VALUE</code>。R-free 是 1992 年才有的指标：留出一部分衍射斑，不参与拟合，专门看模型是不是在骗数据。所以 1981 年的结构，没有这把尺子。读老条目时，心里要有数。',
   },
   {
     title: '每个原子一行：坐标、占有率与 B 因子',
     body:
-      '每行 ATOM 的尾巴是 <span class="hl-occ">占有率 occupancy</span> 与 <span class="hl-b">B 因子</span>。1.00 表示「假设这个位置一定被原子占据」；13.79 表示「假设原子以高斯方式在这个位置附近抖动，模糊程度是这个量级」。注意措辞：<strong>这是模型假设，不是直接测量</strong>。B 因子大不等于原子真的在动——它只是说「如果按这个模型，它表现为很模糊」。第 9 幕会看到，B 因子其实是时空平均的产物。',
+      '每行 <code>ATOM</code> 最后两列：<span class="hl-occ">占有率</span> 和 <span class="hl-b">B 因子</span>。1.00 是「假设这个位置一直有原子」；13.79 是「假设原子在这个位置附近按高斯方式抖动，模糊成这个程度」。注意，这是模型假设，不是直接测出来的。B 因子大，只能说明按这个模型它表现为模糊，不等于原子真的在动。第 9 幕会展开。',
   },
   {
     title: 'HETATM —— 水分子',
     body:
-      '<code>ATOM</code> 之后常跟着一串 <code>HETATM</code> 水分子。放几颗水、放不放水，都能显著改善 R 值——那么这些水是「证据」，还是「为了让拟合更好看而添加的愿望」？这到今天仍是结构争论的焦点。有趣的是：1CRN 现在的版本一行水都没有列出，可它的标题（TITLE）恰恰在讲水分子环。右图「示例」行只是格式示意。',
+      '<code>ATOM</code> 后面常跟着一串 <code>HETATM</code> 水分子。放几颗水、放不放，都能明显改善 R 值。那这些水是证据，还是为了让拟合好看而加进去的？到现在这仍是结构讨论里的常客。有意思的是：1CRN 现在一行水都没有，可它的标题偏偏在讲水环。右图「示例」行只是格式示意。',
   },
   {
     title: 'REMARK 465 —— 缺失残基',
     body:
-      '如果某段主链在密度图里没有信号，建模者会略过它，并在 <code>REMARK 465</code> 里登记为「缺失」。于是 PDB 里「缺失」的真实含义是「没被看见」，而不是「不存在」。1CRN 的 46 个残基全部建模了——很多结构做不到这一点。下次下载结构，先数数它缺了什么。右图「示例」行只是格式示意。',
+      '某段主链在密度图里没有信号时，建模的人会把它略过，然后在 <code>REMARK 465</code> 里登记为缺失。所以 PDB 里的「缺失」，意思是「没被看见」，不是「不存在」。1CRN 的 46 个残基全建了，很多结构做不到。下次下载结构，先数数它缺了什么。右图「示例」行只是格式示意。',
   },
   {
     title: '40 年后，同一块蛋白',
     body:
-      '2000 年，同一块 crambin 被做到 0.54 Å（1EJG）：<code>R_work = 0.090</code>，<code>R_free = 0.094</code>，两者几乎重合——模型没有「记住」衍射数据，值得信赖。对照 1981 年的 1CRN：分辨率 1.50 Å，R 值字段空缺。同一个蛋白，两代数据：分辨率的差距是细节的差距，校验字段的有无是可信度的差距。<strong>现在你只握着文件里的这些数字。接下来，我们从那束 X 射线开始，把它们从头造一遍。</strong>',
+      '2000 年，同一个蛋白做到 0.54 Å（1EJG）：<code>R_work = 0.090</code>，<code>R_free = 0.094</code>，两个数几乎重合，说明模型没有「记住」衍射数据。对照 1981 年的 1CRN：分辨率 1.50 Å，R 值空缺。同一个蛋白，两代数据。分辨率差多少，细节就差多少；校验字段有没有，可信度就差多少。现在你手里只有这些数字。下一步，从一束 X 射线开始，把整条链走一遍。',
   },
 ];
 
@@ -79,14 +79,14 @@ export function mountAct00(parent: HTMLElement): void {
     <header class="chapter-head">
       <span class="chapter-tag">ACT 0</span>
       <h2>案发现场：一个 PDB 条目里的可疑数字</h2>
-      <p class="chapter-lead">你下载过的每个结构文件，都以「X-RAY DIFFRACTION」开头……但「衍射」到底发生了什么？先别急着接受，看看文件里那些你读过、却从没质疑过的数字。</p>
-      <div class="chapter-dep">本幕依赖：PDB 文件、坐标 —— 读者已知概念。</div>
+      <p class="chapter-lead">你下载过的结构文件，开头都写着「X-RAY DIFFRACTION」。衍射到底是怎么回事，先放一放。这一幕只做一件事：把文件里那些你天天看、却从没细想的数字，一个个挑出来看。</p>
+      <div class="chapter-dep">本幕依赖：PDB 文件、坐标 —— 都是你已经见过的东西。</div>
     </header>
     <div class="chapter-grid">
       <div class="media sticky-media">
         <figure class="figure">
           ${CARD_HTML}
-          <figcaption class="figure-caption">真实文件：PDB 1CRN（crambin，1981）。标「示例」的两行仅为格式示意。滚动右侧文字，左侧高亮对应行。</figcaption>
+          <figcaption class="figure-caption">真实文件：PDB 1CRN（crambin，1981）。两行「示例」只是格式示意。滚右侧文字，左侧高亮对应行。</figcaption>
         </figure>
       </div>
       <div class="steps">

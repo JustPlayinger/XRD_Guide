@@ -36,8 +36,14 @@ body {
   line-height: 1.75;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 #app {
-  overflow-x: hidden;
+  /* 注意：不能用 overflow-x: hidden，它会产生滚动容器，导致子元素 position: sticky 失效。
+     改用 overflow-x: clip（不建立滚动容器，sticky 正常工作），配合 html/body 同样设置防横向溢出。 */
 }
 
 ::selection {
@@ -681,6 +687,33 @@ input[type='range'] {
   flex: 1;
   min-width: 140px;
   accent-color: var(--amber);
+}
+
+/* ---------------- 简化说明（可折叠） ---------------- */
+
+.simplify {
+  margin-top: 10px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  line-height: 1.7;
+}
+
+.simplify summary {
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  user-select: none;
+}
+
+.simplify summary:hover {
+  color: var(--ink);
+}
+
+.simplify p {
+  margin: 8px 0 0;
 }
 
 /* ---------------- 收尾与页脚 ---------------- */

@@ -49,8 +49,8 @@ await page.waitForTimeout(1200);
 
 // 1. 章节数量与导航
 check(
-  '两个章节已挂载',
-  (await page.locator('section.chapter').count()) === 2,
+  '三个章节已挂载',
+  (await page.locator('section.chapter').count()) === 3,
   `${await page.locator('section.chapter').count()} sections`,
 );
 check(
@@ -134,8 +134,12 @@ const frameSig2 = await page.evaluate(() => {
 });
 check('波动动画在运行（两帧签名不同）', frameSig !== frameSig2);
 
-// 5. 第 1 幕滚动联动：把最后一步滚入视口 → 自动应用「硬 X 射线」
-await page.locator('#act-1 .step').last().scrollIntoViewIfNeeded();
+// 5. 第 1 幕滚动联动：把最后一步顶部对齐到视口 40% 处（高于活跃带）→ 应用「硬 X 射线」
+const act1Last = page.locator('#act-1 .step').last();
+await act1Last.scrollIntoViewIfNeeded();
+const act1StepTop = await act1Last.evaluate((el) => el.getBoundingClientRect().top);
+const vh = await page.evaluate(() => window.innerHeight);
+await page.evaluate((dy) => window.scrollBy(0, dy), act1StepTop - vh * 0.4);
 await page.waitForTimeout(700);
 const readout = await page.locator('#act1-readout').textContent();
 check('滚动到第 1 幕末尾自动应用「硬 X 射线」', (readout ?? '').includes('0.12'), readout ?? '');
@@ -152,19 +156,44 @@ check('无页面/控制台错误', realErrors.length === 0, realErrors.join(' | 
 
 // 8. 浏览体验增强（引导区 / 步骤圆点 / 幕间导航 / 键盘翻步）
 check('首屏包含「怎么读」引导', (await page.locator('.how-to').count()) === 1);
-check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 2);
+check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 3);
 const dots0 = await page.locator('#act-0 .tracker-dot').count();
 const dots1 = await page.locator('#act-1 .tracker-dot').count();
-check('圆点数量与步骤数一致', dots0 === 7 && dots1 === 4, `act0=${dots0} act1=${dots1}`);
-check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 2);
+const dots2 = await page.locator('#act-2 .tracker-dot').count();
+check('圆点数量与步骤数一致', dots0 === 7 && dots1 === 4 && dots2 === 4, `act0=${dots0} act1=${dots1} act2=${dots2}`);
+check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 3);
 check(
   'ACT0 有「下一幕 → ACT1」链接',
   (await page.locator('#act-0 .chapter-nav a[href="#act-1"]').count()) === 1,
 );
 check(
-  'ACT1 显示「下一幕 · 建设中」',
-  (await page.locator('#act-1 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
+  'ACT1 有「下一幕 → ACT2」链接',
+  (await page.locator('#act-1 .chapter-nav a[href="#act-2"]').count()) === 1,
 );
+check(
+  'ACT2 显示「下一幕 · 建设中」',
+  (await page.locator('#act-2 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
+);
+
+// 9. ACT 2 透镜场景：画布有内容，且 n 滑块改变像/弥散
+await page.locator('#act2-lens').scrollIntoViewIfNeeded();
+await page.waitForTimeout(800);
+const lensStats = await page.evaluate(() => {
+  const c = document.getElementById('act2-lens');
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  let bright = 0;
+  for (let i = 0; i < data.length; i += 40) {
+    if (data[i] > 80 || data[i + 1] > 80) bright++;
+  }
+  return bright;
+});
+check('ACT2 画布有内容（亮点采样 > 50）', lensStats > 50, `bright=${lensStats}`);
+
+await page.locator('#act-2 .step').last().scrollIntoViewIfNeeded();
+await page.waitForTimeout(600);
+const readout2 = await page.locator('#act2-readout').textContent();
+check('滚动到 ACT2 末尾自动回到 n=1.0', (readout2 ?? '').includes('1.00'), readout2 ?? '');
 
 // 键盘 ←/→ 翻步
 await page.evaluate(() => window.scrollTo(0, 0));
@@ -188,6 +217,22 @@ const activeDotBefore = await page
   .locator('#act-0 .tracker-dot.active')
   .getAttribute('data-i');
 check('圆点指示器同步到第 2 步', activeDotBefore === '1', `active dot=${activeDotBefore}`);
+
+// 10. sticky 演示区在长章节末尾仍可见（回归检查：修复 overflow-x 破坏 sticky 的问题）
+for (const id of ['#act-0', '#act-1', '#act-2']) {
+  await page.locator(`${id} .step`).last().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+  const vis = await page.evaluate(
+    (sel) => {
+      const m = document.querySelector(`${sel} .sticky-media`);
+      if (!m) return false;
+      const r = m.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    },
+    id,
+  );
+  check(`${id} 末尾演示区仍可见`, vis);
+}
 
 await browser.close();
 server.kill();

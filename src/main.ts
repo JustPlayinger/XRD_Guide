@@ -12,6 +12,7 @@
 import './styles/index.css';
 import { mountAct00 } from './chapters/act00_entry';
 import { mountAct01 } from './chapters/act01_wavelength';
+import { mountAct02 } from './chapters/act02_no_lens';
 
 interface ChapterMeta {
   id: string;
@@ -23,7 +24,7 @@ interface ChapterMeta {
 const CHAPTERS: ChapterMeta[] = [
   { id: 'act-0', num: 'ACT 0', title: '案发现场', built: true },
   { id: 'act-1', num: 'ACT 1', title: '看见需要波', built: true },
-  { id: 'act-2', num: 'ACT 2', title: '透镜的缺席', built: false },
+  { id: 'act-2', num: 'ACT 2', title: '透镜的缺席', built: true },
   { id: 'act-3', num: 'ACT 3', title: '斑点从哪来', built: false },
   { id: 'act-4', num: 'ACT 4', title: '为什么非要晶体', built: false },
   { id: 'act-5', num: 'ACT 5', title: '格子 × 内容', built: false },
@@ -59,36 +60,36 @@ function buildHero(): HTMLElement {
   hero.id = 'hero';
   hero.className = 'hero';
   hero.innerHTML = `
-    <p class="hero-kicker">交互式可视化 · X 射线单晶衍射从零构建</p>
+    <p class="hero-kicker">交互式可视化 · X 射线单晶衍射</p>
     <h1 class="hero-title">看不见的原子</h1>
     <p class="hero-sub">
-      从一束 X 射线，到 PDB 里的一行坐标。<br />
-      我们会把这条链<strong>从头造一遍</strong>——造完你就知道，该相信它到什么程度。
+      一个 .pdb 文件里的坐标，是怎么从一束 X 射线变出来的？<br />
+      我们把它拆开，一步一步看懂。读完你会自然知道，哪些数字该信、哪些该怀疑。
     </p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#act-0">开始阅读 ↓</a>
-      <span class="hero-note">第 0–1 幕已完成 · 共 11 幕，持续更新</span>
+      <span class="hero-note">已完成第 0–2 幕 · 共 11 幕，陆续补齐</span>
     </div>
     <div class="how-to">
-      <h3 class="how-to-title">怎么读这本教程</h3>
+      <h3 class="how-to-title">怎么用</h3>
       <ol class="how-to-list">
-        <li><span class="how-to-num">1</span>从顶部往下滚动，右侧文字是「旁白」，左侧图形会跟着你的阅读自动前进一步</li>
-        <li><span class="how-to-num">2</span>遇到 <strong>滑块</strong> 就拖一拖、遇到 <strong>按钮</strong> 就点一点——动手才算看懂</li>
-        <li><span class="how-to-num">3</span>按键盘 <kbd>←</kbd> <kbd>→</kbd> 可以在步骤间前后跳转，随时回到任何一幕</li>
+        <li><span class="how-to-num">1</span>往下滚。右侧是讲解，左侧的图会跟着你的位置自动变。</li>
+        <li><span class="how-to-num">2</span>见到滑块就拖，见到按钮就点。不动手，有些话看不明白。</li>
+        <li><span class="how-to-num">3</span>用 <kbd>←</kbd> <kbd>→</kbd> 键在步骤间前后跳；想回哪一幕，点顶部菜单。</li>
       </ol>
     </div>
     <div class="principles">
       <div class="principle-card">
-        <h4>概念守恒律</h4>
-        <p>每一幕只使用「读者已知的概念」或「前文亲手建立的概念」。不允许从天上掉下来一个术语。</p>
+        <h4>概念守恒</h4>
+        <p>每一幕只用到你本来就知道的东西，或者前面刚讲过的东西。新词都是从现象里长出来的，不从天而降。</p>
       </div>
       <div class="principle-card">
         <h4>先现象，后命名</h4>
-        <p>先看到现象、归纳规律，最后才给学名。而每个学名，都对应到 PDB 文件里的某个字段。</p>
+        <p>先看到效果，再补上名字。每个名字最后都会落在 PDB 文件里的某个字段上。</p>
       </div>
       <div class="principle-card">
-        <h4>诚实标注律</h4>
-        <p>每张图都标注「做了哪些简化」。因为认识局限本身，正是这个项目要训练的直觉。</p>
+        <h4>诚实标注</h4>
+        <p>每张图都写清楚「这里简化了什么」。判断一个模型能信多少，本来就是这套教程要练的事。</p>
       </div>
     </div>
     <ol class="roadmap">
@@ -100,7 +101,7 @@ function buildHero(): HTMLElement {
       <li class="roadmap-item"><span class="rm-arrow">→</span><span class="rm-dot">6</span><span class="rm-txt">原子模型</span></li>
       <li class="roadmap-item roadmap-item--final"><span class="rm-arrow">→</span><span class="rm-dot">7</span><span class="rm-txt">隐患</span></li>
     </ol>
-    <p class="hero-footnote">你在这里：第 0–1 幕。</p>
+    <p class="hero-footnote">你在这里：第 0–2 幕。</p>
   `;
   return hero;
 }
@@ -112,14 +113,13 @@ function buildOutro(): HTMLElement {
   outro.innerHTML = `
     <h2>下一幕预告</h2>
     <p>
-      ACT 1 的结论是：只有 X 射线拥有看清原子的波长。<br />
-      但 X 射线折射率 ≈ 1 —— <strong>它不能被透镜聚焦</strong>。
-      ACT 2 将把「看见」拆成「散射」与「聚焦」两半，
-      然后你会发现 X 射线世界里缺了整整一半。麻烦，从「相位」两个字开始。
+      第 2 幕的结论：X 射线没有透镜，成像只能靠计算。但计算需要相位，而探测器只给了强度。<br />
+      第 3 幕回到最简单的实验：两个散射体，看它们到底在探测器上留下什么条纹，
+      以及相位是怎么藏进那张图里的。
     </p>
     <div class="outro-actions">
       <a class="btn btn-ghost" href="#hero">回到开头</a>
-      <span class="hero-note">下一幕（ACT 2）将在里程碑 M2 中发布。</span>
+      <span class="hero-note">下一幕（ACT 3）正在制作中。</span>
     </div>
   `;
   return outro;
@@ -282,6 +282,7 @@ const app = document.getElementById('app')!;
 app.append(buildNav(), buildHero());
 mountAct00(app);
 mountAct01(app);
+mountAct02(app);
 app.append(buildOutro(), buildFooter());
 initProgress();
 initNavSpy();

@@ -84,6 +84,14 @@ await scrollTo('#act-1', 1700);
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}/act1-late.png` });
 
+await scrollTo('#act-2', 300);
+await page.waitForTimeout(1200);
+await page.screenshot({ path: `${OUT}/act2.png` });
+
+await scrollTo('#act-2', 1200);
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${OUT}/act2-late.png` });
+
 await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 await page.waitForTimeout(300);
 await page.screenshot({ path: `${OUT}/footer.png` });
