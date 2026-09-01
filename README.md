@@ -29,9 +29,9 @@
 
 本项目把整条测定流程**从头构建一遍**，遵守三条设计契约：
 
-1. **概念守恒律** —— 每一幕只使用「读者已知的概念」或「前文亲手建立的概念」，术语永远从现象中长出来，而不是从天上掉下来。
-2. **先现象，后命名** —— 先看到、再归纳、最后才给学名；而每个学名都对应到 PDB 文件里的某个字段。
-3. **诚实标注律** —— 每张图都标注「做了哪些简化」。因为认识模型的局限，正是这个项目要训练的直觉。
+1. **概念守恒** —— 每一幕只用到你本来就知道的东西，或者前面刚讲过的东西，术语永远从现象里长出来。
+2. **先现象，后命名** —— 先看到、再归纳、最后才给学名；每个学名都对应到 PDB 文件里的某个字段。
+3. **诚实标注** —— 每张图都写清楚「这里简化了什么」。判断一个模型能信多少，本来就是这套教程要练的事。
 
 ## 章节地图
 
@@ -40,18 +40,20 @@
 | ACT 0 | [案发现场：一个 PDB 条目里的可疑数字](https://rcsb.org/structure/1CRN) | 真实条目里那些「看着像事实」的数字 | ✅ |
 | ACT 1 | 看见需要波：波长决定可分辨的尺度 | 为什么必须用 X 射线（交互式波动实验） | ✅ |
 | ACT 2 | 透镜的缺席 | X 射线无法聚焦 → 成像必须靠计算 | ✅ |
-| ACT 3 | 斑点从哪来 | 两个散射体 → 干涉 → d·sinθ | 🚧 M2 |
-| ACT 4 | 为什么非要晶体 | 周期性 → 离散强斑；布拉格条件；倒易点阵；Ewald 球 | 🚧 M2 |
-| ACT 5 | 格子 × 内容 | 晶格定位置、内容定强度；相量求和 → 结构因子 | 🚧 M3 |
-| ACT 6 | 相位问题 | 探测器只记录 \|F\|²，相位丢失；三种解法 | 🚧 M3 |
-| ACT 7 | 分辨率 | 把斑点加回成密度图；**分辨率 = 信息截止频率** | 🚧 M3 |
-| ACT 8 | 从密度到坐标 | 多解性、R-work / R-free（过拟合）、模型偏倚 | 🚧 M4 |
-| ACT 9 | 晶体不是细胞 | 时空平均、堆积、冷冻、辐射损伤、配体过度解释 | 🚧 M4 |
-| ACT 10 | 使用者的检查清单 | 读结构前该看什么；偏差如何传播进生信管线 | 🚧 M5 |
+| ACT 3 | 斑点从哪来 | 两个散射体 → 干涉 → d·sinθ | ✅ |
+| ACT 4 | 为什么非要晶体 | N 点列阵（N²/1/N）、布拉格条件、实空间↔倒易联动 | ✅ |
+| ACT 5 | 格子 × 内容 | 晶格定位置、内容定强度；相量求和 → 结构因子 | ✅ |
+| ACT 6 | 相位问题 | 自写 FFT 的振幅/相位交换实验；三种解法 | ✅ |
+| ACT 7 | 分辨率 | 把斑点加回成密度图；**分辨率 = 信息截止频率** | ✅ |
+| ACT 8 | 从密度到坐标 | R-work / R-free（过拟合）、模型偏倚（错误相位长出假密度） | ✅ |
+| ACT 9 | 晶体不是细胞 | 时空平均、堆积接触、辐射损伤、选择偏倚、过度解释 | ✅ |
+| ACT 10 | 使用者的检查清单 | PDB 检查器工具（红黄绿灯）+ 偏差如何传播 | ✅ |
 
 ![Act 0](docs/screenshots/act0.png)
 ![Act 1](docs/screenshots/act1.png)
 ![Act 2](docs/screenshots/act2.png)
+![Act 6 · 相位交换实验](docs/screenshots/act6.png)
+![Act 10 · PDB 检查器](docs/screenshots/act10.png)
 
 ## 本地运行（仅开发者）
 
@@ -68,8 +70,8 @@ npm run preview    # 预览生产产物
 测试与校验：
 
 ```bash
-npm run check      # 数值内核校验：Fresnel 积分、波动场物理行为
-npm run smoke      # 无头浏览器端到端冒烟测试（需先 npx playwright install chromium）
+npm run check      # 数值内核校验：Fresnel 积分、波动场、2D FFT
+npm run smoke      # 无头浏览器端到端冒烟测试（48 项，需先 npx playwright install chromium）
 npm run shots      # 重新生成截图（输出到 C:/temp/xrd-shots/）
 ```
 
@@ -79,8 +81,10 @@ Vite 8 + TypeScript 5.9，零 UI 框架，**零 CDN 依赖**（全部打包，�
 
 自写计算内核（每份代码都是可阅读的学习资料）：
 
-- `src/lib/fresnel.ts` —— Fresnel 积分（近场衍射的解析内核）
+- `src/lib/fresnel.ts` —— Fresnel 积分（第 1 幕近场衍射的解析内核）
+- `src/lib/fft.ts` —— 自写 2D FFT（第 6–8 幕相位/分辨率/偏倚实验的计算内核）
 - `src/lib/wave.ts` —— 波动场渲染器（Babinet 原理，Canvas 2D + HiDPI）
+- `src/lib/pdb.ts` —— PDB 解析器（第 10 幕检查清单）
 - `src/lib/scrolly.ts` —— 滚动叙事引擎
 - `scripts/check-*.mts` —— 与独立数值积分 / 标准值对照的校验脚本
 
@@ -88,10 +92,9 @@ Vite 8 + TypeScript 5.9，零 UI 框架，**零 CDN 依赖**（全部打包，�
 src/
 ├─ main.ts                    # 应用入口（导航 / Hero / 章节装配 / 进度条）
 ├─ styles/index.css           # 暗色学术风设计系统
-├─ lib/                       # 自写计算与交互内核
+├─ lib/                       # 自写计算与交互内核（fresnel/fft/wave/lattice/pdb…）
 └─ chapters/
-   ├─ act00_entry/            # ACT 0 案发现场（真实 PDB 文件卡片）
-   └─ act01_wavelength/       # ACT 1 波动实验（交互式衍射场）
+   ├─ act00_entry/ … act10_checklist/   # 11 幕，每幕一个章节模块 + 一个场景类
 public/data/                  # 真实 PDB 条目：1CRN、1EJG
 docs/notes/                   # 物理注解与数据来源
 ```
@@ -107,21 +110,11 @@ docs/notes/                   # 物理注解与数据来源
 - 文字与可视化内容：CC BY 4.0（见 [LICENSE-CONTENT](LICENSE-CONTENT)）
 - 内置 PDB 数据版权归原发布者所有
 
-## 发布到 GitHub Pages
+## 在线发布
 
-1. 在本地初始化并推送到你的仓库：
+本项目已发布：
 
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: Act 0-1 完成"
-   git branch -M main
-   git remote add origin https://github.com/<你的用户名>/XRD_Guide.git
-   git push -u origin main
-   ```
+- **仓库**：https://github.com/JustPlayinger/XRD_Guide
+- **在线站点**：https://justplayinger.github.io/XRD_Guide/
 
-2. 在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
-
-3. 之后每次 push 到 `main` 都会自动构建并部署（见 [.github/workflows/deploy.yml](.github/workflows/deploy.yml)）。
-
-> 站点使用相对路径 `base: './'`，仓库名不影响部署，也可部署到自定义域名。
+每次 push 到 `main` 都会由 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) 自动构建并部署到 GitHub Pages。站点使用相对路径 `base: './'`，仓库名不影响部署，也可部署到自定义域名。
