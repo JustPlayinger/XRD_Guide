@@ -49,8 +49,8 @@ await page.waitForTimeout(1200);
 
 // 1. 章节数量与导航
 check(
-  '三个章节已挂载',
-  (await page.locator('section.chapter').count()) === 3,
+  '五个章节已挂载',
+  (await page.locator('section.chapter').count()) === 5,
   `${await page.locator('section.chapter').count()} sections`,
 );
 check(
@@ -155,24 +155,34 @@ const realErrors = consoleErrors.filter((e) => !e.includes('favicon'));
 check('无页面/控制台错误', realErrors.length === 0, realErrors.join(' | '));
 
 // 8. 浏览体验增强（引导区 / 步骤圆点 / 幕间导航 / 键盘翻步）
-check('首屏包含「怎么读」引导', (await page.locator('.how-to').count()) === 1);
-check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 3);
+check('首屏包含「怎么用」引导', (await page.locator('.how-to').count()) === 1);
+check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 5);
 const dots0 = await page.locator('#act-0 .tracker-dot').count();
 const dots1 = await page.locator('#act-1 .tracker-dot').count();
 const dots2 = await page.locator('#act-2 .tracker-dot').count();
-check('圆点数量与步骤数一致', dots0 === 7 && dots1 === 4 && dots2 === 4, `act0=${dots0} act1=${dots1} act2=${dots2}`);
-check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 3);
+const dots3 = await page.locator('#act-3 .tracker-dot').count();
+const dots4 = await page.locator('#act-4 .tracker-dot').count();
+check(
+  '圆点数量与步骤数一致',
+  dots0 === 7 && dots1 === 4 && dots2 === 4 && dots3 === 4 && dots4 === 5,
+  `act0=${dots0} act1=${dots1} act2=${dots2} act3=${dots3} act4=${dots4}`,
+);
+check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 5);
 check(
   'ACT0 有「下一幕 → ACT1」链接',
   (await page.locator('#act-0 .chapter-nav a[href="#act-1"]').count()) === 1,
 );
 check(
-  'ACT1 有「下一幕 → ACT2」链接',
-  (await page.locator('#act-1 .chapter-nav a[href="#act-2"]').count()) === 1,
+  'ACT2 有「下一幕 → ACT3」链接',
+  (await page.locator('#act-2 .chapter-nav a[href="#act-3"]').count()) === 1,
 );
 check(
-  'ACT2 显示「下一幕 · 建设中」',
-  (await page.locator('#act-2 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
+  'ACT3 有「下一幕 → ACT4」链接',
+  (await page.locator('#act-3 .chapter-nav a[href="#act-4"]').count()) === 1,
+);
+check(
+  'ACT4 显示「下一幕 · 建设中」',
+  (await page.locator('#act-4 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
 );
 
 // 9. ACT 2 透镜场景：画布有内容，且 n 滑块改变像/弥散
@@ -194,6 +204,41 @@ await page.locator('#act-2 .step').last().scrollIntoViewIfNeeded();
 await page.waitForTimeout(600);
 const readout2 = await page.locator('#act2-readout').textContent();
 check('滚动到 ACT2 末尾自动回到 n=1.0', (readout2 ?? '').includes('1.00'), readout2 ?? '');
+
+// 9b. ACT 3 干涉场景：画布有内容
+await page.locator('#act3-interf').scrollIntoViewIfNeeded();
+await page.waitForTimeout(800);
+const interfBright = await page.evaluate(() => {
+  const c = document.getElementById('act3-interf');
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  let bright = 0;
+  for (let i = 0; i < data.length; i += 40) {
+    if (data[i] > 80 || data[i + 1] > 80) bright++;
+  }
+  return bright;
+});
+check('ACT3 画布有内容（亮点采样 > 50）', interfBright > 50, `bright=${interfBright}`);
+
+await page.locator('#act-3 .step').last().scrollIntoViewIfNeeded();
+await page.waitForTimeout(600);
+const readout3 = await page.locator('#act3-readout').textContent();
+check('ACT3 末尾 readout 存在', (readout3 ?? '').length > 0, readout3 ?? '');
+
+// 9c. ACT 4 晶体场景：画布有内容 + 模式切换
+await page.locator('#act4-crystal').scrollIntoViewIfNeeded();
+await page.waitForTimeout(800);
+const crystalBright = await page.evaluate(() => {
+  const c = document.getElementById('act4-crystal');
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  let bright = 0;
+  for (let i = 0; i < data.length; i += 40) {
+    if (data[i] > 80 || data[i + 1] > 80) bright++;
+  }
+  return bright;
+});
+check('ACT4 画布有内容（亮点采样 > 50）', crystalBright > 50, `bright=${crystalBright}`);
 
 // 键盘 ←/→ 翻步
 await page.evaluate(() => window.scrollTo(0, 0));
@@ -219,7 +264,7 @@ const activeDotBefore = await page
 check('圆点指示器同步到第 2 步', activeDotBefore === '1', `active dot=${activeDotBefore}`);
 
 // 10. sticky 演示区在长章节末尾仍可见（回归检查：修复 overflow-x 破坏 sticky 的问题）
-for (const id of ['#act-0', '#act-1', '#act-2']) {
+for (const id of ['#act-0', '#act-1', '#act-2', '#act-3', '#act-4']) {
   await page.locator(`${id} .step`).last().scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   const vis = await page.evaluate(

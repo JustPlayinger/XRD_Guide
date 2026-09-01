@@ -13,6 +13,8 @@ import './styles/index.css';
 import { mountAct00 } from './chapters/act00_entry';
 import { mountAct01 } from './chapters/act01_wavelength';
 import { mountAct02 } from './chapters/act02_no_lens';
+import { mountAct03 } from './chapters/act03_interference';
+import { mountAct04 } from './chapters/act04_crystal';
 
 interface ChapterMeta {
   id: string;
@@ -25,8 +27,8 @@ const CHAPTERS: ChapterMeta[] = [
   { id: 'act-0', num: 'ACT 0', title: '案发现场', built: true },
   { id: 'act-1', num: 'ACT 1', title: '看见需要波', built: true },
   { id: 'act-2', num: 'ACT 2', title: '透镜的缺席', built: true },
-  { id: 'act-3', num: 'ACT 3', title: '斑点从哪来', built: false },
-  { id: 'act-4', num: 'ACT 4', title: '为什么非要晶体', built: false },
+  { id: 'act-3', num: 'ACT 3', title: '斑点从哪来', built: true },
+  { id: 'act-4', num: 'ACT 4', title: '为什么非要晶体', built: true },
   { id: 'act-5', num: 'ACT 5', title: '格子 × 内容', built: false },
   { id: 'act-6', num: 'ACT 6', title: '相位问题', built: false },
   { id: 'act-7', num: 'ACT 7', title: '分辨率', built: false },
@@ -68,7 +70,7 @@ function buildHero(): HTMLElement {
     </p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#act-0">开始阅读 ↓</a>
-      <span class="hero-note">已完成第 0–2 幕 · 共 11 幕，陆续补齐</span>
+      <span class="hero-note">已完成第 0–4 幕 · 共 11 幕，陆续补齐</span>
     </div>
     <div class="how-to">
       <h3 class="how-to-title">怎么用</h3>
@@ -101,7 +103,7 @@ function buildHero(): HTMLElement {
       <li class="roadmap-item"><span class="rm-arrow">→</span><span class="rm-dot">6</span><span class="rm-txt">原子模型</span></li>
       <li class="roadmap-item roadmap-item--final"><span class="rm-arrow">→</span><span class="rm-dot">7</span><span class="rm-txt">隐患</span></li>
     </ol>
-    <p class="hero-footnote">你在这里：第 0–2 幕。</p>
+    <p class="hero-footnote">你在这里：第 0–4 幕。</p>
   `;
   return hero;
 }
@@ -113,13 +115,12 @@ function buildOutro(): HTMLElement {
   outro.innerHTML = `
     <h2>下一幕预告</h2>
     <p>
-      第 2 幕的结论：X 射线没有透镜，成像只能靠计算。但计算需要相位，而探测器只给了强度。<br />
-      第 3 幕回到最简单的实验：两个散射体，看它们到底在探测器上留下什么条纹，
-      以及相位是怎么藏进那张图里的。
+      现在我们知道：晶格决定斑点出现在哪里，那斑点为什么忽明忽暗？<br />
+      第 5 幕让「分子内容」进场——每个斑点的强度，由分子的形状说了算。
     </p>
     <div class="outro-actions">
       <a class="btn btn-ghost" href="#hero">回到开头</a>
-      <span class="hero-note">下一幕（ACT 3）正在制作中。</span>
+      <span class="hero-note">下一幕（ACT 5）正在制作中。</span>
     </div>
   `;
   return outro;
@@ -283,6 +284,8 @@ app.append(buildNav(), buildHero());
 mountAct00(app);
 mountAct01(app);
 mountAct02(app);
+mountAct03(app);
+mountAct04(app);
 app.append(buildOutro(), buildFooter());
 initProgress();
 initNavSpy();

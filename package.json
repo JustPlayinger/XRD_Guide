@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "check": "node scripts/check-fresnel.mts && node scripts/check-field.mts",
+    "check": "node scripts/check-fresnel.mts && node scripts/check-field.mts && node scripts/check-fft.mts",
     "smoke": "node scripts/verify.mjs",
     "shots": "node scripts/screenshot.mjs"
   },
