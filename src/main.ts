@@ -15,6 +15,8 @@ import { mountAct01 } from './chapters/act01_wavelength';
 import { mountAct02 } from './chapters/act02_no_lens';
 import { mountAct03 } from './chapters/act03_interference';
 import { mountAct04 } from './chapters/act04_crystal';
+import { mountAct05 } from './chapters/act05_content';
+import { mountAct06 } from './chapters/act06_phase';
 
 interface ChapterMeta {
   id: string;
@@ -29,8 +31,8 @@ const CHAPTERS: ChapterMeta[] = [
   { id: 'act-2', num: 'ACT 2', title: '透镜的缺席', built: true },
   { id: 'act-3', num: 'ACT 3', title: '斑点从哪来', built: true },
   { id: 'act-4', num: 'ACT 4', title: '为什么非要晶体', built: true },
-  { id: 'act-5', num: 'ACT 5', title: '格子 × 内容', built: false },
-  { id: 'act-6', num: 'ACT 6', title: '相位问题', built: false },
+  { id: 'act-5', num: 'ACT 5', title: '格子 × 内容', built: true },
+  { id: 'act-6', num: 'ACT 6', title: '相位问题', built: true },
   { id: 'act-7', num: 'ACT 7', title: '分辨率', built: false },
   { id: 'act-8', num: 'ACT 8', title: '从密度到坐标', built: false },
   { id: 'act-9', num: 'ACT 9', title: '晶体不是细胞', built: false },
@@ -70,7 +72,7 @@ function buildHero(): HTMLElement {
     </p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#act-0">开始阅读 ↓</a>
-      <span class="hero-note">已完成第 0–4 幕 · 共 11 幕，陆续补齐</span>
+      <span class="hero-note">已完成第 0–6 幕 · 共 11 幕，陆续补齐</span>
     </div>
     <div class="how-to">
       <h3 class="how-to-title">怎么用</h3>
@@ -103,7 +105,7 @@ function buildHero(): HTMLElement {
       <li class="roadmap-item"><span class="rm-arrow">→</span><span class="rm-dot">6</span><span class="rm-txt">原子模型</span></li>
       <li class="roadmap-item roadmap-item--final"><span class="rm-arrow">→</span><span class="rm-dot">7</span><span class="rm-txt">隐患</span></li>
     </ol>
-    <p class="hero-footnote">你在这里：第 0–4 幕。</p>
+    <p class="hero-footnote">你在这里：第 0–6 幕。</p>
   `;
   return hero;
 }
@@ -115,12 +117,12 @@ function buildOutro(): HTMLElement {
   outro.innerHTML = `
     <h2>下一幕预告</h2>
     <p>
-      现在我们知道：晶格决定斑点出现在哪里，那斑点为什么忽明忽暗？<br />
-      第 5 幕让「分子内容」进场——每个斑点的强度，由分子的形状说了算。
+      相位有办法猜了，接下来就是把几万个斑点「加」回成一张密度图。<br />
+      第 7 幕你会亲手拖动分辨率：同一个分子，从一坨雾变到能看见侧链。
     </p>
     <div class="outro-actions">
       <a class="btn btn-ghost" href="#hero">回到开头</a>
-      <span class="hero-note">下一幕（ACT 5）正在制作中。</span>
+      <span class="hero-note">下一幕（ACT 7）正在制作中。</span>
     </div>
   `;
   return outro;
@@ -286,6 +288,8 @@ mountAct01(app);
 mountAct02(app);
 mountAct03(app);
 mountAct04(app);
+mountAct05(app);
+mountAct06(app);
 app.append(buildOutro(), buildFooter());
 initProgress();
 initNavSpy();
