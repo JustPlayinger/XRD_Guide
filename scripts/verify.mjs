@@ -150,6 +150,45 @@ check('无横向溢出', !overflow);
 const realErrors = consoleErrors.filter((e) => !e.includes('favicon'));
 check('无页面/控制台错误', realErrors.length === 0, realErrors.join(' | '));
 
+// 8. 浏览体验增强（引导区 / 步骤圆点 / 幕间导航 / 键盘翻步）
+check('首屏包含「怎么读」引导', (await page.locator('.how-to').count()) === 1);
+check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 2);
+const dots0 = await page.locator('#act-0 .tracker-dot').count();
+const dots1 = await page.locator('#act-1 .tracker-dot').count();
+check('圆点数量与步骤数一致', dots0 === 7 && dots1 === 4, `act0=${dots0} act1=${dots1}`);
+check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 2);
+check(
+  'ACT0 有「下一幕 → ACT1」链接',
+  (await page.locator('#act-0 .chapter-nav a[href="#act-1"]').count()) === 1,
+);
+check(
+  'ACT1 显示「下一幕 · 建设中」',
+  (await page.locator('#act-1 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
+);
+
+// 键盘 ←/→ 翻步
+await page.evaluate(() => window.scrollTo(0, 0));
+await page.waitForTimeout(400);
+const stepBefore = await page
+  .locator('.step.current')
+  .first()
+  .getAttribute('data-step');
+await page.keyboard.press('ArrowRight');
+await page.waitForTimeout(1300);
+const stepAfter = await page
+  .locator('.step.current')
+  .first()
+  .getAttribute('data-step');
+check(
+  '键盘 → 前进到下一步',
+  stepBefore === '0' && stepAfter === '1',
+  `before=${stepBefore} after=${stepAfter}`,
+);
+const activeDotBefore = await page
+  .locator('#act-0 .tracker-dot.active')
+  .getAttribute('data-i');
+check('圆点指示器同步到第 2 步', activeDotBefore === '1', `active dot=${activeDotBefore}`);
+
 await browser.close();
 server.kill();
 const failed = results.filter((r) => !r.pass);

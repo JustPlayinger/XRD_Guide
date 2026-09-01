@@ -7,6 +7,21 @@
 
 ![Hero](docs/screenshots/hero.png)
 
+## 读者使用指南（零配置）
+
+**直接打开下面的网址就能读，不需要安装任何东西：**
+
+> **https://justplayinger.github.io/XRD_Guide/**
+
+阅读方式：
+
+1. 从上往下滚动 —— 右侧是文字「旁白」，左侧图形会跟着阅读自动前进一步；
+2. 遇到 **滑块** 就拖一拖、遇到 **按钮** 就点一点 —— 动手才算看懂；
+3. 按键盘 `←` `→` 可在步骤间前后跳转；顶部导航可随时跳回任何一幕；
+4. 每一幕末尾有「上一幕 / 下一幕」按钮，不会迷路。
+
+（以下「本地运行」仅对想要修改/开发本项目的人有用。）
+
 ## 这个项目在做什么
 
 你在数据库中下载到的每个 `.pdb` 文件，都声称「由 X 射线衍射测定」。
@@ -37,7 +52,10 @@
 ![Act 0](docs/screenshots/act0.png)
 ![Act 1](docs/screenshots/act1.png)
 
-## 本地运行
+## 本地运行（仅开发者）
+
+> 只是想**读**教程？直接访问 [https://justplayinger.github.io/XRD_Guide/](https://justplayinger.github.io/XRD_Guide/) 即可，无需任何安装。
+> 以下命令只适合想要修改/扩展本项目的人，需要 Node.js ≥ 22。
 
 ```bash
 npm install

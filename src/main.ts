@@ -69,6 +69,14 @@ function buildHero(): HTMLElement {
       <a class="btn btn-primary" href="#act-0">开始阅读 ↓</a>
       <span class="hero-note">第 0–1 幕已完成 · 共 11 幕，持续更新</span>
     </div>
+    <div class="how-to">
+      <h3 class="how-to-title">怎么读这本教程</h3>
+      <ol class="how-to-list">
+        <li><span class="how-to-num">1</span>从顶部往下滚动，右侧文字是「旁白」，左侧图形会跟着你的阅读自动前进一步</li>
+        <li><span class="how-to-num">2</span>遇到 <strong>滑块</strong> 就拖一拖、遇到 <strong>按钮</strong> 就点一点——动手才算看懂</li>
+        <li><span class="how-to-num">3</span>按键盘 <kbd>←</kbd> <kbd>→</kbd> 可以在步骤间前后跳转，随时回到任何一幕</li>
+      </ol>
+    </div>
     <div class="principles">
       <div class="principle-card">
         <h4>概念守恒律</h4>
@@ -184,6 +192,92 @@ function initNavSpy(): void {
   });
 }
 
+/**
+ * 统一增强每个章节的浏览体验（无需改动各章节模块）：
+ *  1. 幕内步骤指示器：在左侧图形上方显示一排圆点，标记「当前第几步 / 共几步」；
+ *  2. 幕间导航：章节末尾插入「上一幕 / 下一幕」按钮，迷路时一键回到其它幕。
+ */
+function enhanceChapters(): void {
+  const built = CHAPTERS.filter((c) => c.built);
+
+  built.forEach((meta, idx) => {
+    const section = document.getElementById(meta.id);
+    if (!section) return;
+
+    // —— 幕内步骤圆点 ——
+    const media = section.querySelector<HTMLElement>('.sticky-media');
+    const steps = Array.from(section.querySelectorAll<HTMLElement>('.step'));
+    if (media && steps.length > 0) {
+      const tracker = document.createElement('div');
+      tracker.className = 'step-tracker';
+      tracker.title = '本幕进度：第 1 / N 步';
+      tracker.innerHTML = steps
+        .map((_, i) => `<span class="tracker-dot" data-i="${i}" title="第 ${i + 1} 步"></span>`)
+        .join('');
+      media.prepend(tracker);
+
+      const sync = (): void => {
+        const cur = section.querySelector<HTMLElement>('.step.current');
+        const i = cur ? steps.indexOf(cur) : 0;
+        tracker.querySelectorAll<HTMLElement>('.tracker-dot').forEach((d, di) => {
+          d.classList.toggle('active', di === i);
+        });
+        tracker.title = `本幕进度：第 ${i + 1} / ${steps.length} 步`;
+      };
+      sync();
+      const mo = new MutationObserver(sync);
+      mo.observe(section.querySelector('.steps')!, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['class'],
+      });
+    }
+
+    // —— 幕间导航 ——
+    const prev = idx > 0 ? built[idx - 1] : null;
+    const next = idx < built.length - 1 ? built[idx + 1] : null;
+    const nav = document.createElement('nav');
+    nav.className = 'chapter-nav';
+    nav.innerHTML = `
+      <div>
+        ${
+          prev
+            ? `<a class="btn btn-ghost" href="#${prev.id}">← ${prev.num} ${prev.title}</a>`
+            : '<span class="btn btn-ghost" aria-disabled="true">← 已是第一幕</span>'
+        }
+      </div>
+      <div>
+        ${
+          next
+            ? `<a class="btn btn-primary" href="#${next.id}">${next.num} ${next.title} →</a>`
+            : '<span class="btn btn-ghost" aria-disabled="true">下一幕 · 建设中</span>'
+        }
+      </div>
+    `;
+    section.appendChild(nav);
+  });
+}
+
+/** 键盘 ← / → 在步骤之间跳转（左右方向键不会干扰页面默认滚动） */
+function initKeyboardNav(): void {
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const tag = (document.activeElement?.tagName ?? '').toLowerCase();
+    if (['input', 'textarea', 'select', 'button', 'a'].includes(tag)) return;
+    e.preventDefault();
+    const steps = Array.from(document.querySelectorAll<HTMLElement>('.step'));
+    if (steps.length === 0) return;
+    const cur = steps.findIndex((s) => s.classList.contains('current'));
+    const base = cur >= 0 ? cur : 0;
+    const next = Math.max(0, Math.min(steps.length - 1, base + (e.key === 'ArrowRight' ? 1 : -1)));
+    // 把目标步骤对齐到「活跃带」（视口约 52% 处），而不是视口顶部——
+    // 这样滚动叙事引擎会恰好选中它，而不是被带内更靠后的步骤抢走。
+    const band = window.innerHeight * 0.52;
+    const top = steps[next].getBoundingClientRect().top + window.scrollY - band;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  });
+}
+
 const app = document.getElementById('app')!;
 app.append(buildNav(), buildHero());
 mountAct00(app);
@@ -191,3 +285,5 @@ mountAct01(app);
 app.append(buildOutro(), buildFooter());
 initProgress();
 initNavSpy();
+enhanceChapters();
+initKeyboardNav();
