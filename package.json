@@ -1,0 +1,20 @@
+{
+  "name": "xrd-guide",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "看不见的原子：从一束 X 射线到 PDB 里的一行坐标 —— 交互式可视化教程",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check-fresnel.mts && node scripts/check-field.mts",
+    "smoke": "node scripts/verify.mjs",
+    "shots": "node scripts/screenshot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "typescript": "~5.9.3",
+    "vite": "^8.2.2"
+  }
+}
