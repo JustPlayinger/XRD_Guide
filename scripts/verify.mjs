@@ -49,8 +49,8 @@ await page.waitForTimeout(1200);
 
 // 1. 章节数量与导航
 check(
-  '七个章节已挂载',
-  (await page.locator('section.chapter').count()) === 7,
+  '十一个章节已挂载',
+  (await page.locator('section.chapter').count()) === 11,
   `${await page.locator('section.chapter').count()} sections`,
 );
 check(
@@ -156,7 +156,7 @@ check('无页面/控制台错误', realErrors.length === 0, realErrors.join(' | 
 
 // 8. 浏览体验增强（引导区 / 步骤圆点 / 幕间导航 / 键盘翻步）
 check('首屏包含「怎么用」引导', (await page.locator('.how-to').count()) === 1);
-check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 7);
+check('每幕都有步骤圆点指示器', (await page.locator('.step-tracker').count()) === 11);
 const dots0 = await page.locator('#act-0 .tracker-dot').count();
 const dots1 = await page.locator('#act-1 .tracker-dot').count();
 const dots2 = await page.locator('#act-2 .tracker-dot').count();
@@ -164,12 +164,16 @@ const dots3 = await page.locator('#act-3 .tracker-dot').count();
 const dots4 = await page.locator('#act-4 .tracker-dot').count();
 const dots5 = await page.locator('#act-5 .tracker-dot').count();
 const dots6 = await page.locator('#act-6 .tracker-dot').count();
+const dots7 = await page.locator('#act-7 .tracker-dot').count();
+const dots8 = await page.locator('#act-8 .tracker-dot').count();
+const dots9 = await page.locator('#act-9 .tracker-dot').count();
+const dots10 = await page.locator('#act-10 .tracker-dot').count();
 check(
   '圆点数量与步骤数一致',
-  dots0 === 7 && dots1 === 4 && dots2 === 4 && dots3 === 4 && dots4 === 5 && dots5 === 4 && dots6 === 4,
-  `0=${dots0} 1=${dots1} 2=${dots2} 3=${dots3} 4=${dots4} 5=${dots5} 6=${dots6}`,
+  dots0 === 7 && dots1 === 4 && dots2 === 4 && dots3 === 4 && dots4 === 5 && dots5 === 4 && dots6 === 4 && dots7 === 4 && dots8 === 4 && dots9 === 5 && dots10 === 4,
+  `0=${dots0} 1=${dots1} 2=${dots2} 3=${dots3} 4=${dots4} 5=${dots5} 6=${dots6} 7=${dots7} 8=${dots8} 9=${dots9} 10=${dots10}`,
 );
-check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 7);
+check('每幕都有幕间导航', (await page.locator('.chapter-nav').count()) === 11);
 check(
   'ACT0 有「下一幕 → ACT1」链接',
   (await page.locator('#act-0 .chapter-nav a[href="#act-1"]').count()) === 1,
@@ -187,8 +191,20 @@ check(
   (await page.locator('#act-4 .chapter-nav a[href="#act-5"]').count()) === 1,
 );
 check(
-  'ACT6 显示「下一幕 · 建设中」',
-  (await page.locator('#act-6 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
+  'ACT6 有「下一幕 → ACT7」链接',
+  (await page.locator('#act-6 .chapter-nav a[href="#act-7"]').count()) === 1,
+);
+check(
+  'ACT7 有「下一幕 → ACT8」链接',
+  (await page.locator('#act-7 .chapter-nav a[href="#act-8"]').count()) === 1,
+);
+check(
+  'ACT9 有「下一幕 → ACT10」链接',
+  (await page.locator('#act-9 .chapter-nav a[href="#act-10"]').count()) === 1,
+);
+check(
+  'ACT10 显示「已是最后一幕」',
+  (await page.locator('#act-10 .chapter-nav .btn[aria-disabled="true"]').count()) >= 1,
 );
 
 // 9. ACT 2 透镜场景：画布有内容，且 n 滑块改变像/弥散
@@ -276,7 +292,55 @@ const phaseBright = await page.evaluate(() => {
 });
 check('ACT6 画布有内容（四格重建，亮点采样 > 200）', phaseBright > 200, `bright=${phaseBright}`);
 
-// 键盘 ←/→ 翻步
+// 9f. ACT 7 分辨率场景
+await page.locator('#act7-res').scrollIntoViewIfNeeded();
+await page.waitForTimeout(1500);
+const resBright = await page.evaluate(() => {
+  const c = document.getElementById('act7-res');
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  let bright = 0;
+  for (let i = 0; i < data.length; i += 40) {
+    if (data[i] > 80 || data[i + 1] > 80) bright++;
+  }
+  return bright;
+});
+check('ACT7 画布有内容（亮点采样 > 100）', resBright > 100, `bright=${resBright}`);
+
+// ACT7 滑块联动
+await page.locator('#act7-r').fill('10');
+await page.waitForTimeout(400);
+const resReadout = await page.locator('#act7-readout').textContent();
+check('ACT7 滑块联动读数', (resReadout ?? '').includes('1.0'), resReadout ?? '');
+
+// 9g. ACT 9 失真场景
+await page.locator('#act9-dist').scrollIntoViewIfNeeded();
+await page.waitForTimeout(800);
+const distBright = await page.evaluate(() => {
+  const c = document.getElementById('act9-dist');
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  let bright = 0;
+  for (let i = 0; i < data.length; i += 40) {
+    if (data[i] > 80 || data[i + 1] > 80) bright++;
+  }
+  return bright;
+});
+check('ACT9 画布有内容（亮点采样 > 50）', distBright > 50, `bright=${distBright}`);
+
+// 9h. ACT 10 检查器：默认自动分析 1EJG（离线回退本地数据）
+await page.locator('#act10-cards').scrollIntoViewIfNeeded();
+await page.waitForTimeout(2500);
+const cardCount = await page.locator('#act10-cards .inspector-card').count();
+check('ACT10 检查器生成卡片（≥8 张）', cardCount >= 8, `cards=${cardCount}`);
+const cardText = await page.locator('#act10-cards').textContent();
+check('ACT10 卡片包含分辨率与 R-free', (cardText ?? '').includes('R-free') && (cardText ?? '').includes('0.09'), '1EJG 应有 R-free 0.094');
+
+// 键盘 ←/→ 翻步（先失焦，避免焦点在滑块/按钮上）
+await page.evaluate(() => {
+  const el = document.activeElement;
+  if (el && typeof el.blur === 'function') el.blur();
+});
 await page.evaluate(() => window.scrollTo(0, 0));
 await page.waitForTimeout(400);
 const stepBefore = await page
@@ -300,7 +364,7 @@ const activeDotBefore = await page
 check('圆点指示器同步到第 2 步', activeDotBefore === '1', `active dot=${activeDotBefore}`);
 
 // 10. sticky 演示区在长章节末尾仍可见（回归检查：修复 overflow-x 破坏 sticky 的问题）
-for (const id of ['#act-0', '#act-1', '#act-2', '#act-3', '#act-4', '#act-5', '#act-6']) {
+for (const id of ['#act-0', '#act-1', '#act-2', '#act-3', '#act-4', '#act-5', '#act-6', '#act-7', '#act-8', '#act-9', '#act-10']) {
   await page.locator(`${id} .step`).last().scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   const vis = await page.evaluate(
